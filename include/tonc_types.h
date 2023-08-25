@@ -54,11 +54,16 @@
 //! Put <b>non</b>-initialized variable in EWRAM.
 #define  EWRAM_BSS __attribute__((section(".sbss")))
 
+// Clang note: the IWRAM_CODE and EWRAM_CODE defines also specified the
+// long_call attribute, but clang currently doesn't support this, so it's
+// removed. If we need to call fns outside of branch address range, the linker
+// should create a range-extension thunk.
+
 //! Put function in IWRAM.
-#define IWRAM_CODE __attribute__((section(".iwram"), long_call))
+#define IWRAM_CODE __attribute__((section(".iwram")))
 
 //! Put function in EWRAM.
-#define EWRAM_CODE __attribute__((section(".ewram"), long_call))
+#define EWRAM_CODE __attribute__((section(".ewram")))
 
 //! Force a variable to an \a n-byte boundary
 #define ALIGN(n)	__attribute__((aligned(n)))
