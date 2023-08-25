@@ -47,7 +47,7 @@ BEGIN_FUNC_ARM(isr_master_nest, CSEC_IWRAM)
 .Lirq_found:
 	ldr		r0, [r0, #-4]	@ isr= pir[ii-1].isr
 	cmp		r0, #0
-	streqh	r1, [r3, #2]	@ No ISR: ack and return
+	strheq	r1, [r3, #2]	@ No ISR: ack and return
 	bxeq	lr
 
 	@ --- ISR found, prep for nested irqs ---

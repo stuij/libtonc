@@ -27,8 +27,8 @@ BEGIN_FUNC_ARM(bmp8_drawg_b1cts_fast, CSEC_IWRAM)
 	@# Get srcD (r1), width (r8), charH (r9)
 	ldmia	r7, {r1, r3}			@ Load data, widths
 	cmp		r3, #0
-	ldrneb	r8, [r3, r0]			@ Var charW
-	ldreqb	r8, [r7, #TF_charW]		@ Fixed charW
+	ldrbne	r8, [r3, r0]			@ Var charW
+	ldrbeq	r8, [r7, #TF_charW]		@ Fixed charW
 	ldrh	r3, [r7, #TF_cellS]
 	mla		r1, r3, r0, r1			@ srcL
 	ldrb	r2, [r7, #TF_charH]		@ charH

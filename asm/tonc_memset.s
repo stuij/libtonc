@@ -60,7 +60,7 @@ BEGIN_FUNC_ARM(memset32, CSEC_IWRAM)
 	@ residual 0-7 words
 .Lres_set32:
 		subs	r12, r12, #1
-		stmhsia	r0!, {r1}
+		stmiahs	r0!, {r1}
 		bhi		.Lres_set32
 	bx	lr
 END_FUNC(memset32)
@@ -86,31 +86,31 @@ BEGIN_FUNC_THUMB(memset16, CSEC_TEXT)
 	cmp		r2, #5
 	bls		.Ltail_set16
 	@ dst not word aligned: copy 1 hword and align
-	lsl		r3, r0, #31
+	lsls	r3, r0, #31
 	bcc		.Lmain_set16
 		strh	r1, [r0]
-		add		r0, #2
-		sub		r2, r2, #1
+		adds	r0, #2
+		subs	r2, r2, #1
 	@ Again, memset32 does the real work
 .Lmain_set16:
-	lsl		r4, r1, #16
-	orr		r1, r4
-	lsl		r4, r2, #31
-	lsr		r2, r2, #1
-	ldr		r3, =memset32
+	lsls	r4, r1, #16
+	orrs	r1, r4
+	lsls	r4, r2, #31
+	lsrs	r2, r2, #1
+	ldr 	r3, =memset32
 	bl		.Llong_bl
 	@ NOTE: r0 is altered by memset32, but in exactly the right 
 	@ way, so we can use is as is. r1 is now doubled though.
-	lsr		r2, r4, #31
+	lsrs	r2, r4, #31
 	beq		.Lend_set16
-	lsr		r1, #16
+	lsrs	r1, #16
 .Ltail_set16:
-	sub		r2, #1
+	subs	r2, #1
 	bcc		.Lend_set16		@ r2 was 0, bug out
-	lsl		r2, r2, #1
+	lsls	r2, r2, #1
 .Lres_set16:
 		strh	r1, [r0, r2]
-		sub		r2, r2, #2
+		subs	r2, r2, #2
 		bcs		.Lres_set16
 .Lend_set16:
 	pop		{r4}

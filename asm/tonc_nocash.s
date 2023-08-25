@@ -22,12 +22,12 @@ BEGIN_FUNC_THUMB(nocash_puts, CSEC_TEXT)
 	ldr		r4,=nocash_message	@ Get messenger address
 	ldr 	r1,=nocash_buffer	@ Get buffer address
 
-	mov 	r2, #0
+	movs 	r2, #0
 	mov		r12, r2
 
 	@ Iterate over loop parts
 .Lmsg_loop:
-		mov 	r2, #0
+		movs 	r2, #0
 
 		@ Copy up to 80 chars and print
 .Lmsg_cpy:							@ for(ii=0; ii<80; ii++)
@@ -35,7 +35,7 @@ BEGIN_FUNC_THUMB(nocash_puts, CSEC_TEXT)
 			strb	r3, [r1, r2]	@		break;
 			cmp 	r3, #0
 			beq 	.Lmsg_print
-			add		r2, #1
+			adds	r2, #1
 			cmp		r2, #80
 			bne 	.Lmsg_cpy
 
@@ -44,7 +44,7 @@ BEGIN_FUNC_THUMB(nocash_puts, CSEC_TEXT)
 		bl		.Lmsg_far_call
 		
 		@ If not at end, continue with next part of string
-		add		r0, r2
+		adds	r0, r2
 		add		r12, r2
 		cmp		r3, #0
 		bne		.Lmsg_loop

@@ -54,8 +54,8 @@ BEGIN_FUNC_ARM(memcpy32, CSEC_IWRAM)
 	@ and the residual 0-7 words
 .Lres_cpy32:
 		subs	r12, r12, #1
-		ldmcsia	r1!, {r3}
-		stmcsia	r0!, {r3}
+		ldmiacs	r1!, {r3}
+		stmiacs	r0!, {r3}
 		bhi		.Lres_cpy32
 	bx	lr
 END_FUNC(memcpy32)
@@ -84,37 +84,37 @@ BEGIN_FUNC_THUMB(memcpy16, CSEC_TEXT)
 	bls		.Ltail_cpy16
 	@ unreconcilable alignment -> std cpy
 	@ if (dst^src)&2 -> alignment impossible
-	mov		r3, r0
-	eor		r3, r1
-	lsl		r3, r3, #31		@ (dst^src), bit 1 into carry
+	movs	r3, r0
+	eors	r3, r1
+	lsls	r3, r3, #31		@ (dst^src), bit 1 into carry
 	bcs		.Ltail_cpy16	@ (dst^src)&2 : must copy by halfword
 	@ src and dst have same alignment -> word align
-	lsl		r3, r0, #31
+	lsls	r3, r0, #31
 	bcc		.Lmain_cpy16	@ ~src&2 : already word aligned
 	@ aligning is necessary: copy 1 hword and align
 		ldrh	r3, [r1]
 		strh	r3, [r0]
-		add		r0, #2
-		add		r1, #2
-		sub		r2, r2, #1
+		adds	r0, #2
+		adds	r1, #2
+		subs	r2, r2, #1
 	@ right, and for the REAL work, we're gonna use memcpy32
 .Lmain_cpy16:
-	lsl		r4, r2, #31
-	lsr		r2, r2, #1
+	lsls	r4, r2, #31
+	lsrs	r2, r2, #1
 	ldr		r3, =memcpy32
 	bl		.Llong_bl
 	@ NOTE: r0,r1 are altered by memcpy32, but in exactly the right 
 	@ way, so we can use them as is.
-	lsr		r2, r4, #31
+	lsrs	r2, r4, #31
 	beq		.Lend_cpy16
 .Ltail_cpy16:
-	sub		r2, #1
+	subs	r2, #1
 	bcc		.Lend_cpy16		@ r2 was 0, bug out
-	lsl		r2, r2, #1
+	lsls	r2, r2, #1
 .Lres_cpy16:
 		ldrh	r3, [r1, r2]
 		strh	r3, [r0, r2]
-		sub		r2, r2, #2
+		subs	r2, r2, #2
 		bcs		.Lres_cpy16
 .Lend_cpy16:
 	pop		{r4}
