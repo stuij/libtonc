@@ -6,14 +6,11 @@
 .SUFFIXES:
 #---------------------------------------------------------------------------------
 
-ifeq ($(strip $(DEVKITARM)),)
-$(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM)
+ifeq ($(strip $(GBA_LLVM)),)
+$(error Please set GBA_LLVM in your environment. export GBA_LLVM=<path to gba-llvm installation>)
 endif
-ifeq ($(strip $(DEVKITPRO)),)
-$(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>devkitPro)
-endif
-include $(DEVKITARM)/gba_rules
 
+BIN         :=  $(GBA_LLVM)/bin
 BUILD		:=	build
 SRCDIRS		:=	asm src src/font src/tte src/pre1.3
 INCDIRS		:=	include
@@ -21,14 +18,18 @@ DATADIRS	:=	data
 
 DATESTRING	:=	$(shell date +%Y)$(shell date +%m)$(shell date +%d)
 
-ARCH		:=	-mthumb -mthumb-interwork
-RARCH		:= -mthumb-interwork -mthumb
-IARCH		:= -mthumb-interwork -marm
+ARCH		:=	-mthumb
 
 bTEMPS		:= 0	# Save gcc temporaries (.i and .s files)
 bDEBUG2		:= 0	# Generate debug info (bDEBUG2? Not a full DEBUG flag. Yet)
 
 VERSION		:=	1.4.3
+
+#---------------------------------------------------------------------------------
+# Clang config file
+#---------------------------------------------------------------------------------
+
+CONFIG=armv4t-gba.cfg
 
 #---------------------------------------------------------------------------------
 # Options for code generation
@@ -37,16 +38,12 @@ VERSION		:=	1.4.3
 CBASE   := $(INCLUDE) -Wall -fno-strict-aliasing #-fno-tree-loop-optimize
 CBASE	+= -O2
 
-RCFLAGS := $(CBASE) $(RARCH)
-ICFLAGS := $(CBASE) $(IARCH) -mlong-calls #-fno-gcse
-CFLAGS  := $(RCFLAGS)
+CFLAGS := $(CBASE) $(ARCH)
 
-ASFLAGS := $(INCLUDE) -Wa,--warn $(ARCH)
+ASFLAGS := $(INCLUDE)
 
 # --- Save temporary files ? ---
 ifeq ($(strip $(bTEMPS)), 1)
-	RCFLAGS  += -save-temps
-	ICFLAGS  += -save-temps
 	CFLAGS	 += -save-temps
 	CXXFLAGS += -save-temps
 endif
@@ -59,10 +56,16 @@ ifeq ($(strip $(bDEBUG2)), 1)
 endif
 
 #---------------------------------------------------------------------------------
-# Path to tools - this can be deleted if you set the path in windows
+# Tools
 #---------------------------------------------------------------------------------
 
-export PATH		:=	$(DEVKITARM)/bin:$(PATH)
+export CC	:=	$(BIN)/clang
+export CXX	:=	$(BIN)/clang++
+export AS	:=	$(BIN)/clang
+export AR	:=	$(BIN)/llvm-ar
+export OBJCOPY	:=	$(BIN)/llvm-objcopy
+export STRIP	:=	$(BIN)/llvm-strip
+export NM	:=	$(BIN)/llvm-nm
 
 #---------------------------------------------------------------------------------
 
@@ -72,9 +75,7 @@ export TARGET	:=	$(CURDIR)/lib/libtonc.a
 
 export VPATH	:=	$(foreach dir,$(DATADIRS),$(CURDIR)/$(dir)) $(foreach dir,$(SRCDIRS),$(CURDIR)/$(dir))
 
-ICFILES		:=	$(foreach dir,$(SRCDIRS),$(notdir $(wildcard $(dir)/*.iwram.c)))
-RCFILES		:=	$(foreach dir,$(SRCDIRS),$(notdir $(wildcard $(dir)/*.c)))
-CFILES		:=  $(ICFILES) $(RCFILES)
+CFILES		:=	$(foreach dir,$(SRCDIRS),$(notdir $(wildcard $(dir)/*.c)))
 
 SFILES		:=	$(foreach dir,$(SRCDIRS),$(notdir $(wildcard $(dir)/*.s)))
 BINFILES	:=	$(foreach dir,$(DATADIRS),$(notdir $(wildcard $(dir)/*.*)))
@@ -98,9 +99,9 @@ clean:
 	@rm -fr $(BUILD)
 
 install:
-	@mkdir -p $(DESTDIR)$(DEVKITPRO)/libtonc/lib
-	@cp -rv include $(DESTDIR)$(DEVKITPRO)/libtonc/include
-	@cp -v lib/libtonc.a $(DESTDIR)$(DEVKITPRO)/libtonc/lib/
+	@mkdir -p $(BUILD)/libtonc/lib
+	@cp -rv include $(BUILD)/libtonc/include
+	@cp -v lib/libtonc.a $(BUILD)/libtonc/lib/
 
 #-------------------------------------------------------------------------------
 dist:
@@ -124,15 +125,15 @@ $(TARGET): $(OFILES)
 	@echo Building $@
 	@rm -f $@
 	@$(AR) -crs $@ $^
-	$(PREFIX)nm -Sn $@ > $(basename $(notdir $@)).map
-
-%.iwram.o : %.iwram.c
-	@echo $(notdir $<)
-	$(CC) -MMD -MP -MF $(DEPSDIR)/$(@:.o=.d) $(ICFLAGS) -c $< -o $@
+	$(NM) -Sn $@ > $(basename $(notdir $@)).map
 
 %.o : %.c
 	@echo $(notdir $<)
-	$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d $(RCFLAGS) -c $< -o $@
+	$(CC) --config $(CONFIG) -MMD -MP -MF $(DEPSDIR)/$*.d $(CFLAGS) -c $< -o $@
+
+%.o : %.s
+	@echo $(notdir $<)
+	$(CC) --config $(CONFIG) -MMD -MP -MF $(DEPSDIR)/$*.d -x assembler-with-cpp $(ASFLAGS) -c $< -o $@
 
 -include $(DEPENDS)
 
