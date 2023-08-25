@@ -7,10 +7,14 @@
 //
 // === NOTES ===
 
+// This file was commented out, as it relies on newlib (sys/iosupport.h).
+// We're using picolibc which doesn't support the iosupport.h functionality.
+/*
+
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
-#include <sys/iosupport.h>
+// #include <sys/iosupport.h>
 
 #include "tonc_tte.h"
 #include "tonc_nocash.h"
@@ -63,7 +67,7 @@ void tte_init_con()
 
 	sConInitialized = 1;
 }
-
+*/
 
 //! Parse for VT100-sequences
 /*!	Taken librally from libgba.<br>
@@ -72,6 +76,8 @@ void tte_init_con()
 	\param text	Sequence string, starting at the '['.
 	\todo: check for buffer overflow.
 */
+
+/*
 int tte_cmd_vt100(const char *text)
 {
 	int ch;
@@ -175,11 +181,14 @@ ssize_t tte_con_nocash(struct _reent *r, void *fd, const char *text, size_t len)
 	return len;
 
 }
+*/
 
 //! Internal routine for stdio functionality.
 /*!	\note	While this function 'works', I am not 100% sure I'm 
 		handling everything correctly.
 */
+
+/*
 ssize_t tte_con_write(struct _reent *r, void *fd, const char *text, size_t len)
 {
 	if(!sConInitialized || !text || len<=0)
@@ -262,3 +271,4 @@ ssize_t tte_con_write(struct _reent *r, void *fd, const char *text, size_t len)
 
 
 // EOF
+*/
