@@ -12,6 +12,7 @@ endif
 
 BIN         :=  $(GBA_LLVM)/bin
 BUILD		:=	build
+DESTDIR		?=	$(BUILD)
 SRCDIRS		:=	asm src src/font src/tte src/pre1.3
 INCDIRS		:=	include
 DATADIRS	:=	data
@@ -99,9 +100,9 @@ clean:
 	@rm -fr $(BUILD)
 
 install:
-	@mkdir -p $(BUILD)/libtonc/lib
-	@cp -rv include $(BUILD)/libtonc/include
-	@cp -v lib/libtonc.a $(BUILD)/libtonc/lib/
+	@mkdir -p $(DESTDIR)/libtonc/lib
+	@cp -rv include $(DESTDIR)/libtonc/include
+	@cp -v lib/libtonc.a $(DESTDIR)/libtonc/lib/
 
 #-------------------------------------------------------------------------------
 dist:
