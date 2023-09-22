@@ -100,8 +100,9 @@ clean:
 	@rm -fr $(BUILD)
 
 install:
-	@mkdir -p $(DESTDIR)/libtonc/lib
-	@cp -rv include $(DESTDIR)/libtonc/include
+	@mkdir -p $(DESTDIR)/lib
+	@mkdir -p $(DESTDIR)/include
+	@cp -rv include/* $(DESTDIR)/include/
 	@cp -v lib/libtonc.a $(DESTDIR)/libtonc/lib/
 
 #-------------------------------------------------------------------------------
