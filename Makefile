@@ -103,7 +103,7 @@ install:
 	@mkdir -p $(DESTDIR)/lib
 	@mkdir -p $(DESTDIR)/include
 	@cp -rv include/* $(DESTDIR)/include/
-	@cp -v lib/libtonc.a $(DESTDIR)/libtonc/lib/
+	@cp -v lib/libtonc.a $(DESTDIR)/lib/
 
 #-------------------------------------------------------------------------------
 dist:
